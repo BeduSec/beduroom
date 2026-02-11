@@ -198,6 +198,34 @@ document.body.addEventListener('touchstart', triggerFullscreen);
                     </div>
                 </div>
               <button class="p-2 hover:bg-white/5 rounded-lg transition-colors text-zinc-500 hover:text-red-400" onclick="toggleFullScreen()"><i data-lucide="fullscreen" class="w-4 h-4"></i></button>
+              
+              <script>
+  function sendBedusecNotification() {
+    if (Notification.permission === "granted") {
+      const options = {
+        body: "Bedusec Chat room is active, Please join now",
+        icon: "favicon.png",
+        badge: "favicon.png"
+      };
+      new Notification("Bedusec Chat Room", options);
+    }
+  }
+
+  function initNotifications() {
+    if (!("Notification" in window)) {
+      return;
+    }
+    Notification.requestPermission().then(permission => {
+      if (permission === "granted") {
+        const intervalTime = 300000; 
+        setInterval(sendBedusecNotification, intervalTime);
+        sendBedusecNotification();
+      }
+    });
+  }
+
+  initNotifications();
+</script>
 
 <script>
   function toggleFullScreen() {
