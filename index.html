@@ -1,0 +1,461 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Bedusec Secure Relay</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://unpkg.com/lucide@latest"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        glass: "rgba(255, 255, 255, 0.05)",
+                        glassBorder: "rgba(255, 255, 255, 0.1)",
+                        accent: "#3b82f6"
+                    },
+                    fontFamily: {
+                        mono: ['Courier New', 'monospace'],
+                        sans: ['Inter', 'sans-serif']
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body {
+            background-color: #000000;
+            color: #e5e5e5;
+            font-family: 'Inter', sans-serif;
+        }
+        .glass-panel {
+            background: rgba(10, 10, 10, 0.6);
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+        .glass-input {
+            background: rgba(0, 0, 0, 0.5);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.2s;
+        }
+        .glass-input:focus {
+            border-color: rgba(255, 255, 255, 0.3);
+            outline: none;
+            background: rgba(0, 0, 0, 0.8);
+        }
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 6px; }
+        ::-webkit-scrollbar-track { background: #000; }
+        ::-webkit-scrollbar-thumb { background: #333; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #555; }
+        
+        .loading-skeleton {
+            background: linear-gradient(90deg, #1a1a1a 25%, #2a2a2a 50%, #1a1a1a 75%);
+            background-size: 200% 100%;
+            animation: loading 1.5s infinite;
+        }
+        @keyframes loading {
+            0% { background-position: 200% 0; }
+            100% { background-position: -200% 0; }
+        }
+    </style>
+</head>
+<body class="h-screen flex flex-col overflow-hidden selection:bg-white/20">
+
+    <!-- Auth Container -->
+    <div id="auth-container" class="flex-1 flex items-center justify-center p-4">
+        <div class="glass-panel w-full max-w-md p-8 rounded-2xl shadow-2xl relative overflow-hidden">
+            <!-- Background Decoration -->
+            <div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-white/20 to-transparent"></div>
+
+            <div class="text-center mb-8">
+                <i data-lucide="shield-check" class="w-12 h-12 mx-auto mb-4 text-white/80"></i>
+                <h1 class="text-2xl font-bold tracking-tight text-white">Bedusec Relay</h1>
+                <p class="text-gray-500 text-sm mt-2">Encrypted Communication Node</p>
+            </div>
+
+            <!-- Toggle Buttons -->
+            <div class="flex gap-4 mb-8 p-1 bg-black/40 rounded-lg">
+                <button onclick="toggleAuth('login')" id="tab-login" class="flex-1 py-2 text-sm font-medium rounded-md transition-all bg-white/10 text-white">Sign In</button>
+                <button onclick="toggleAuth('register')" id="tab-register" class="flex-1 py-2 text-sm font-medium rounded-md transition-all text-gray-400 hover:text-white">Register</button>
+            </div>
+
+            <!-- Login Form -->
+            <form id="login-form" class="space-y-5" onsubmit="handleLogin(event)">
+                <div>
+                    <label class="block text-xs font-mono text-gray-500 mb-2 uppercase tracking-wider">Beducode ID</label>
+                    <div class="relative">
+                        <i data-lucide="hash" class="absolute left-3 top-3.5 w-4 h-4 text-gray-500"></i>
+                        <input type="text" id="login-beducode" placeholder="BEDU-XXXX-XXXX" class="glass-input w-full pl-10 pr-4 py-3 rounded-lg font-mono uppercase placeholder-gray-700" required>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-gray-500 mb-2 uppercase tracking-wider">Password</label>
+                    <div class="relative">
+                        <i data-lucide="lock" class="absolute left-3 top-3.5 w-4 h-4 text-gray-500"></i>
+                        <input type="password" id="login-password" placeholder="••••••••••••" class="glass-input w-full pl-10 pr-4 py-3 rounded-lg" required>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-white text-black font-bold py-3 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center gap-2">
+                    <span id="login-btn-text">Connect to Node</span>
+                    <i data-lucide="arrow-right" class="w-4 h-4"></i>
+                </button>
+                <p id="login-error" class="text-red-500 text-xs text-center min-h-[1.5rem]"></p>
+            </form>
+
+            <!-- Register Form (Hidden by default) -->
+            <form id="register-form" class="space-y-5 hidden" onsubmit="handleRegister(event)">
+                <div>
+                    <label class="block text-xs font-mono text-gray-500 mb-2 uppercase tracking-wider">Ops Nickname</label>
+                    <div class="relative">
+                        <i data-lucide="user" class="absolute left-3 top-3.5 w-4 h-4 text-gray-500"></i>
+                        <input type="text" id="reg-nickname" placeholder="e.g. Ghost, Zero" class="glass-input w-full pl-10 pr-4 py-3 rounded-lg placeholder-gray-700" required>
+                    </div>
+                </div>
+                <div>
+                    <label class="block text-xs font-mono text-gray-500 mb-2 uppercase tracking-wider">Password</label>
+                    <div class="relative">
+                        <i data-lucide="lock" class="absolute left-3 top-3.5 w-4 h-4 text-gray-500"></i>
+                        <input type="password" id="reg-password" placeholder="••••••••••••" class="glass-input w-full pl-10 pr-4 py-3 rounded-lg" required>
+                    </div>
+                </div>
+                <button type="submit" class="w-full bg-white text-black font-bold py-3 rounded-lg hover:bg-gray-200 transition-colors">
+                    Generate Identity
+                </button>
+                <p id="reg-error" class="text-red-500 text-xs text-center min-h-[1.5rem]"></p>
+            </form>
+
+            <!-- Success Screen (Hidden by default) -->
+            <div id="success-screen" class="hidden text-center space-y-6">
+                <div class="w-16 h-16 bg-green-500/10 rounded-full flex items-center justify-center mx-auto border border-green-500/20">
+                    <i data-lucide="check" class="w-8 h-8 text-green-500"></i>
+                </div>
+                <h3 class="text-xl font-bold text-white">Identity Established</h3>
+                <p class="text-gray-400 text-sm">Save your Beducode. It is your ONLY key to the network.</p>
+                
+                <div class="bg-black/50 border border-dashed border-gray-700 p-4 rounded-lg relative group">
+                    <p id="new-beducode" class="text-2xl font-mono text-white font-bold tracking-widest select-all"></p>
+                    <button onclick="copyBeducode()" class="absolute top-2 right-2 p-2 hover:bg-white/10 rounded-md transition-colors" title="Copy">
+                        <i data-lucide="copy" class="w-4 h-4 text-gray-400 group-hover:text-white"></i>
+                    </button>
+                </div>
+
+                <button onclick="enterApp()" class="w-full bg-white text-black font-bold py-3 rounded-lg hover:bg-gray-200 transition-colors">
+                    Acknowledge & Enter
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- App Container (Hidden by default) -->
+    <div id="app-container" class="hidden flex-col h-full relative">
+        <!-- Header -->
+        <header class="glass-panel border-b border-white/10 h-16 px-4 flex items-center justify-between shrink-0 z-10">
+            <div class="flex items-center gap-3">
+                <div class="w-2 h-2 rounded-full bg-green-500 shadow-[0_0_10px_rgba(34,197,94,0.5)]"></div>
+                <div>
+                    <h2 class="font-bold text-sm tracking-wide">Team Bedusec</h2>
+                    <p class="text-[10px] font-mono text-gray-500 uppercase tracking-widest">Encrypted Stream</p>
+                </div>
+            </div>
+            <button onclick="logout()" class="p-2 hover:bg-white/10 rounded-full transition-colors text-red-400 hover:text-red-300">
+                <i data-lucide="log-out" class="w-5 h-5"></i>
+            </button>
+        </header>
+
+        <!-- Chat Area -->
+        <main id="chat-messages" class="flex-1 overflow-y-auto p-4 space-y-4 scroll-smooth">
+            <!-- Messages will be injected here -->
+            <div id="skeleton-loader" class="space-y-4">
+                <div class="flex gap-3 items-end">
+                    <div class="w-8 h-8 rounded-lg loading-skeleton flex-shrink-0"></div>
+                    <div class="w-48 h-10 rounded-lg loading-skeleton rounded-bl-none"></div>
+                </div>
+                <div class="flex gap-3 items-end flex-row-reverse">
+                    <div class="w-8 h-8 rounded-lg loading-skeleton flex-shrink-0"></div>
+                    <div class="w-64 h-16 rounded-lg loading-skeleton rounded-br-none"></div>
+                </div>
+                <div class="flex gap-3 items-end">
+                    <div class="w-8 h-8 rounded-lg loading-skeleton flex-shrink-0"></div>
+                    <div class="w-32 h-10 rounded-lg loading-skeleton rounded-bl-none"></div>
+                </div>
+            </div>
+        </main>
+
+        <!-- Input Area -->
+        <div class="p-4 glass-panel border-t border-white/10 shrink-0">
+            <form onsubmit="sendMessage(event)" class="relative max-w-4xl mx-auto flex gap-3">
+                <input type="text" id="message-input" autocomplete="off" placeholder="Inject payload..." class="glass-input flex-1 px-4 py-3 rounded-lg focus:ring-1 focus:ring-white/20">
+                <button type="submit" class="bg-white text-black px-4 rounded-lg hover:bg-gray-200 transition-colors flex items-center justify-center">
+                    <i data-lucide="send" class="w-5 h-5"></i>
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Firebase SDKs -->
+    <script type="module">
+        import { initializeApp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-app.js";
+        import { getAuth, createUserWithEmailAndPassword, signInWithEmailAndPassword, signOut, onAuthStateChanged, updateProfile } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-auth.js";
+        import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
+
+        const firebaseConfig = {
+            apiKey: "YOUR_API_KEY_HERE",
+            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
+            projectId: "YOUR_PROJECT_ID",
+            storageBucket: "YOUR_PROJECT_ID.appspot.com",
+            messagingSenderId: "YOUR_SENDER_ID",
+            appId: "YOUR_APP_ID"
+        };
+
+        const app = initializeApp(firebaseConfig);
+        const auth = getAuth(app);
+        const db = getFirestore(app);
+        const DOMAIN = "@secure.local";
+
+        let currentUser = null;
+        let unsubscribeMessages = null;
+
+        // --- Auth Functions ---
+        
+        window.handleRegister = async (e) => {
+            e.preventDefault();
+            const nickname = document.getElementById('reg-nickname').value.trim();
+            const password = document.getElementById('reg-password').value;
+            const errorEl = document.getElementById('reg-error');
+
+            if (!nickname || !password) return;
+
+            errorEl.textContent = "Generating Beducode keys...";
+            
+            try {
+                const beducode = generateBeducode();
+                const email = `${beducode}${DOMAIN}`;
+
+                const userCredential = await createUserWithEmailAndPassword(auth, email, password);
+                await updateProfile(userCredential.user, { displayName: nickname });
+                
+                // Show success screen
+                document.getElementById('new-beducode').textContent = beducode;
+                document.getElementById('register-form').classList.add('hidden');
+                document.getElementById('tab-login').parentElement.classList.add('hidden');
+                document.getElementById('success-screen').classList.remove('hidden');
+                
+            } catch (err) {
+                errorEl.textContent = "Error: " + err.message;
+            }
+        };
+
+        window.handleLogin = async (e) => {
+            e.preventDefault();
+            const beducode = document.getElementById('login-beducode').value.trim().toUpperCase();
+            const password = document.getElementById('login-password').value;
+            const btnText = document.getElementById('login-btn-text');
+            const errorEl = document.getElementById('login-error');
+
+            btnText.textContent = "Authenticating...";
+            errorEl.textContent = "";
+
+            try {
+                const email = `${beducode}${DOMAIN}`;
+                await signInWithEmailAndPassword(auth, email, password);
+                // Auth state listener will handle the UI switch
+            } catch (err) {
+                console.error(err);
+                errorEl.textContent = "Access Denied: Invalid Beducode or Password";
+                btnText.textContent = "Connect to Node";
+            }
+        };
+
+        window.logout = () => signOut(auth);
+
+        window.enterApp = () => {
+             // Just triggering the view change manually if needed, usually auth listener handles it
+             if(currentUser) initApp();
+        };
+
+        window.copyBeducode = () => {
+            const code = document.getElementById('new-beducode').innerText;
+            navigator.clipboard.writeText(code);
+            const icon = document.querySelector('.group-hover\\:text-white');
+            if(icon) icon.style.color = '#22c55e'; // Turn green temporarily
+        };
+
+        function generateBeducode() {
+            const chars = 'ABCDEFGHJKLMNPQRSTUVWXYZ23456789';
+            let result = '';
+            for (let i = 0; i < 8; i++) {
+                result += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            return `BEDU-${result.substring(0, 4)}-${result.substring(4, 8)}`;
+        }
+
+        // --- App Logic ---
+
+        onAuthStateChanged(auth, (user) => {
+            currentUser = user;
+            if (user) {
+                // If we are just registering, don't jump straight to chat, let them see the Beducode first
+                const isRegistering = !document.getElementById('success-screen').classList.contains('hidden');
+                
+                if (!isRegistering) {
+                    initApp();
+                }
+            } else {
+                showAuth();
+            }
+        });
+
+        function showAuth() {
+            if (unsubscribeMessages) unsubscribeMessages();
+            document.getElementById('app-container').classList.add('hidden');
+            document.getElementById('auth-container').classList.remove('hidden');
+            // Reset forms
+            document.getElementById('login-btn-text').textContent = "Connect to Node";
+            document.getElementById('login-beducode').value = '';
+            document.getElementById('login-password').value = '';
+            document.getElementById('success-screen').classList.add('hidden');
+            document.getElementById('tab-login').parentElement.classList.remove('hidden');
+            toggleAuth('login');
+        }
+
+        function initApp() {
+            document.getElementById('auth-container').classList.add('hidden');
+            document.getElementById('app-container').classList.remove('hidden');
+            document.getElementById('app-container').classList.add('flex');
+            
+            // Listen for messages
+            const q = query(collection(db, 'messages'), orderBy('createdAt', 'asc'), limit(50));
+            
+            const chatBox = document.getElementById('chat-messages');
+            
+            unsubscribeMessages = onSnapshot(q, (snapshot) => {
+                // Remove skeleton on first load
+                const skeleton = document.getElementById('skeleton-loader');
+                if(skeleton) skeleton.remove();
+
+                // Clear if it's a full reload (simple implementation) or append logic
+                // For simplicity in this vanilla JS, we'll re-render the list or append new ones.
+                // To avoid flickering, let's just clear and rebuild for now, or use a smarter append.
+                // Smart append:
+                
+                snapshot.docChanges().forEach((change) => {
+                    if (change.type === "added") {
+                        const msg = change.doc.data();
+                        const msgEl = createMessageElement(msg, change.doc.id);
+                        chatBox.appendChild(msgEl);
+                    }
+                });
+
+                // Scroll to bottom
+                chatBox.scrollTop = chatBox.scrollHeight;
+            });
+        }
+
+        window.sendMessage = async (e) => {
+            e.preventDefault();
+            const input = document.getElementById('message-input');
+            const text = input.value.trim();
+            
+            if (!text || !currentUser) return;
+            
+            input.value = ''; // Optimistic clear
+
+            try {
+                await addDoc(collection(db, 'messages'), {
+                    text: text,
+                    createdAt: serverTimestamp(),
+                    sender: currentUser.displayName, // Nickname
+                    uid: currentUser.uid
+                });
+            } catch (error) {
+                console.error("Transmission failed", error);
+                input.value = text; // Restore on fail
+            }
+        };
+
+        function createMessageElement(msg, id) {
+            const isMe = msg.uid === currentUser.uid;
+            const container = document.createElement('div');
+            container.className = `flex gap-3 mb-4 animate-fade-in ${isMe ? 'flex-row-reverse' : ''}`;
+            
+            // Avatar (Initials)
+            const avatar = document.createElement('div');
+            avatar.className = `w-8 h-8 rounded-lg flex-shrink-0 flex items-center justify-center text-xs font-mono font-bold ${isMe ? 'bg-white text-black' : 'bg-gray-800 text-gray-400'}`;
+            avatar.textContent = msg.sender ? msg.sender.substring(0, 2).toUpperCase() : '??';
+
+            // Message Body
+            const body = document.createElement('div');
+            body.className = `max-w-[85%] sm:max-w-[70%] space-y-1`;
+
+            // Sender Name
+            const name = document.createElement('div');
+            name.className = `text-[10px] font-mono font-bold uppercase tracking-wider ${isMe ? 'text-right text-gray-500' : 'text-gray-500'}`;
+            name.textContent = isMe ? 'YOU' : msg.sender;
+
+            // Bubble
+            const bubble = document.createElement('div');
+            bubble.className = `px-4 py-2 rounded-xl text-sm break-words leading-relaxed border ${
+                isMe 
+                ? 'bg-white/10 border-white/20 text-white rounded-tr-none' 
+                : 'bg-black/40 border-gray-800 text-gray-300 rounded-tl-none'
+            }`;
+            
+            // Security: Escape HTML first, then linkify
+            const safeText = escapeHtml(msg.text);
+            bubble.innerHTML = linkify(safeText);
+
+            body.appendChild(name);
+            body.appendChild(bubble);
+
+            container.appendChild(avatar);
+            container.appendChild(body);
+
+            return container;
+        }
+
+        function escapeHtml(text) {
+            if (!text) return '';
+            return text
+                .replace(/&/g, "&amp;")
+                .replace(/</g, "&lt;")
+                .replace(/>/g, "&gt;")
+                .replace(/"/g, "&quot;")
+                .replace(/'/g, "&#039;");
+        }
+
+        function linkify(text) {
+            const urlRegex = /(https?:\/\/[^\s]+)/g;
+            return text.replace(urlRegex, (url) => {
+                return `<a href="${url}" target="_blank" class="text-blue-400 hover:text-blue-300 underline underline-offset-2">${url}</a>`;
+            });
+        }
+
+        // --- UI Utils ---
+        window.toggleAuth = (mode) => {
+            const loginForm = document.getElementById('login-form');
+            const registerForm = document.getElementById('register-form');
+            const tabLogin = document.getElementById('tab-login');
+            const tabRegister = document.getElementById('tab-register');
+
+            if (mode === 'login') {
+                loginForm.classList.remove('hidden');
+                registerForm.classList.add('hidden');
+                tabLogin.className = "flex-1 py-2 text-sm font-medium rounded-md transition-all bg-white/10 text-white";
+                tabRegister.className = "flex-1 py-2 text-sm font-medium rounded-md transition-all text-gray-400 hover:text-white";
+            } else {
+                loginForm.classList.add('hidden');
+                registerForm.classList.remove('hidden');
+                tabLogin.className = "flex-1 py-2 text-sm font-medium rounded-md transition-all text-gray-400 hover:text-white";
+                tabRegister.className = "flex-1 py-2 text-sm font-medium rounded-md transition-all bg-white/10 text-white";
+            }
+        };
+
+        // Initialize Icons
+        lucide.createIcons();
+    </script>
+</body>
+</html>
