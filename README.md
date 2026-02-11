@@ -54,3 +54,17 @@ BeduRoom operates on a zero-persistence and zero-tracking architecture. Access i
 
 * Connection Issues: If the green indicator in the header is not active, verify your internet connection.
 * Authentication Failures: Ensure your Beducode includes the dashes and is entered exactly as generated.
+
+
+
+> Created only for @bedusec members, joining without known identity will lead to ban of your IP from accessing the program every again, and you won't be able to join it even when you join bedusec. Ask for permission from [@umenyi-bryan](https://github.com/umenyi-bryan) before joining the room.
+
+Creatad with love and passion by **@iciiwhite**
+
+
+
+
+
+
+
+
