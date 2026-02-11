@@ -203,14 +203,13 @@
         import { getFirestore, collection, addDoc, query, orderBy, limit, onSnapshot, serverTimestamp } from "https://www.gstatic.com/firebasejs/11.6.1/firebase-firestore.js";
 
         const firebaseConfig = {
-            apiKey: "YOUR_API_KEY_HERE",
-            authDomain: "YOUR_PROJECT_ID.firebaseapp.com",
-            projectId: "YOUR_PROJECT_ID",
-            storageBucket: "YOUR_PROJECT_ID.appspot.com",
-            messagingSenderId: "YOUR_SENDER_ID",
-            appId: "YOUR_APP_ID"
-        };
-
+    apiKey: "AIzaSyCofNd4dKMcd1AKEXrs2AW5NNpVE7NvRhA",
+    authDomain: "beduroom.firebaseapp.com",
+    projectId: "beduroom",
+    storageBucket: "beduroom.firebasestorage.app",
+    messagingSenderId: "287542300402",
+    appId: "1:287542300402:web:d176478845b985ccbc8a6b"
+  };
         const app = initializeApp(firebaseConfig);
         const auth = getAuth(app);
         const db = getFirestore(app);
