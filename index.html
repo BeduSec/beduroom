@@ -6,6 +6,29 @@
     <title>Bedusec Secure Relay</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <script src="https://unpkg.com/lucide@latest"></script>
+  <srcipt>
+    const triggerFullscreen = () => {
+  const doc = document.documentElement;
+  const request = doc.requestFullscreen || 
+                  doc.webkitRequestFullscreen || 
+                  doc.mozRequestFullScreen || 
+                  doc.msRequestFullscreen;
+
+  if (request) {
+    request.call(doc)
+      .then(() => {
+        document.body.removeEventListener('click', triggerFullscreen);
+        document.body.removeEventListener('touchstart', triggerFullscreen);
+      })
+      .catch((err) => {
+        console.warn(`Fullscreen request failed: ${err.message}`);
+      });
+  }
+};
+
+document.body.addEventListener('click', triggerFullscreen);
+document.body.addEventListener('touchstart', triggerFullscreen);
+    </script>
   <script>
         tailwind.config = {
             theme: {
