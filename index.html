@@ -224,7 +224,73 @@ document.body.addEventListener('touchstart', triggerFullscreen);
     }
   }
 </script>
-              
+              <button id="notify-btn" onclick="startBeduNotifications()" class="p-2 hover:bg-white/5 rounded-lg transition-colors text-zinc-500 hover:text-red-400">
+  <i data-lucide="bell" class="w-4 h-4"></i>
+</button>
+
+<script>
+  let reminderInterval;
+
+  const swCode = `
+    self.addEventListener('notificationclick', event => {
+      event.notification.close();
+      event.waitUntil(
+        clients.matchAll({type: 'window'}).then(windowClients => {
+          for (let client of windowClients) {
+            if (client.url === '/' && 'focus' in client) return client.focus();
+          }
+          if (clients.openWindow) return clients.openWindow('/');
+        })
+      );
+    });
+  `;
+
+  const blob = new Blob([swCode], { type: 'application/javascript' });
+  const swUrl = URL.createObjectURL(blob);
+
+  if ('serviceWorker' in navigator) {
+    navigator.serviceWorker.register(swUrl);
+  }
+
+  function startBeduNotifications() {
+    if (!("Notification" in window)) return;
+
+    Notification.requestPermission().then(permission => {
+      if (permission === 'granted') {
+        document.getElementById('notify-btn').style.display = 'none';
+        triggerNotificationLoop();
+      }
+    });
+  }
+
+  function triggerNotificationLoop() {
+    sendNotification();
+    reminderInterval = setInterval(sendNotification, 300000);
+  }
+
+  function sendNotification() {
+    const title = "BeduRoom Active";
+    const options = {
+      body: "The chat is active. Join the discussion.",
+      icon: "favicon.png",
+      badge: "favicon.png",
+      vibrate: [200, 100, 200],
+      tag: "bedu-reminder"
+    };
+
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.ready.then(registration => {
+        registration.showNotification(title, options);
+      });
+    } else {
+      new Notification(title, options);
+    }
+  }
+
+  if (typeof lucide !== 'undefined') {
+    lucide.createIcons();
+  }
+</script>
               
                 <button onclick="logout()" class="p-2 hover:bg-white/5 rounded-lg transition-colors text-zinc-500 hover:text-red-400">
                     <i data-lucide="power" class="w-4 h-4"></i>
