@@ -251,6 +251,83 @@ document.body.addEventListener('touchstart', triggerFullscreen);
 </script>
 
               
+              <link rel="stylesheet" href="https://unpkg.com/lucide-static/font/lucide.css">
+
+<button id="notify-btn" onclick="startBeduNotifications()" class="p-2 hover:bg-white/5 rounded-lg transition-colors text-zinc-500 hover:text-red-400">
+
+  <i class="lucide-bell"></i>
+
+</button>
+
+<script>
+
+  let reminderInterval;
+
+  if ('serviceWorker' in navigator) {
+
+    navigator.serviceWorker.register('sw.js');
+
+  }
+
+  function startBeduNotifications() {
+
+    if (!('serviceWorker' in navigator)) {
+
+      return;
+
+    }
+
+    Notification.requestPermission().then(permission => {
+
+      if (permission === 'granted') {
+
+        document.getElementById('notify-btn').style.display = 'none';
+
+        triggerNotificationLoop();
+
+      }
+
+    });
+
+  }
+
+  function triggerNotificationLoop() {
+
+    showNativeNotification();
+
+    reminderInterval = setInterval(() => {
+
+      showNativeNotification();
+
+    }, 300000); 
+
+  }
+
+  function showNativeNotification() {
+
+    navigator.serviceWorker.ready.then(registration => {
+
+      registration.showNotification("BeduRoom Active", {
+
+        body: "The chat is active. Join the discussion.",
+
+        icon: "favicon.png",
+
+        badge: "favicon.png",
+
+        vibrate: [200, 100, 200],
+
+        tag: "bedu-reminder"
+
+      });
+
+    });
+
+  }
+
+</script>
+              
+              
                 <button onclick="logout()" class="p-2 hover:bg-white/5 rounded-lg transition-colors text-zinc-500 hover:text-red-400">
                     <i data-lucide="power" class="w-4 h-4"></i>
                 </button>
