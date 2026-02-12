@@ -201,34 +201,6 @@ document.body.addEventListener('touchstart', triggerFullscreen);
                 </div>
               <button class="p-2 hover:bg-white/5 rounded-lg transition-colors text-zinc-500 hover:text-red-400" onclick="toggleFullScreen()"><i data-lucide="fullscreen" class="w-4 h-4"></i></button>
               
-              <script>
-  function sendBedusecNotification() {
-    if (Notification.permission === "granted") {
-      const options = {
-        body: "Bedusec Chat room is active, Please join now",
-        icon: "favicon.png",
-        badge: "favicon.png"
-      };
-      new Notification("Bedusec Chat Room", options);
-    }
-  }
-
-  function initNotifications() {
-    if (!("Notification" in window)) {
-      return;
-    }
-    Notification.requestPermission().then(permission => {
-      if (permission === "granted") {
-        const intervalTime = 300; 
-        setInterval(sendBedusecNotification, intervalTime);
-        sendBedusecNotification();
-      }
-    });
-  }
-
-  initNotifications();
-</script>
-
 <script>
   function toggleFullScreen() {
     if (!document.fullscreenElement) {
@@ -251,81 +223,6 @@ document.body.addEventListener('touchstart', triggerFullscreen);
       }
     }
   }
-</script>
-
-
-<button id="notify-btn" onclick="startBeduNotifications()" class="p-2 hover:bg-white/5 rounded-lg transition-colors text-zinc-500 hover:text-red-400">
-
-  <i data-lucide="bell" class="w-4 h-4"></i>
-
-</button>
-
-<script>
-
-  let reminderInterval;
-
-  if ('serviceWorker' in navigator) {
-
-    navigator.serviceWorker.register('sw.js');
-
-  }
-
-  function startBeduNotifications() {
-
-    if (!('serviceWorker' in navigator)) {
-
-      return;
-
-    }
-
-    Notification.requestPermission().then(permission => {
-
-      if (permission === 'granted') {
-
-        document.getElementById('notify-btn').style.display = 'none';
-
-        triggerNotificationLoop();
-
-      }
-
-    });
-
-  }
-
-  function triggerNotificationLoop() {
-
-    showNativeNotification();
-
-    reminderInterval = setInterval(() => {
-
-      showNativeNotification();
-
-    }, 300000); 
-
-  }
-
-  function showNativeNotification() {
-
-    navigator.serviceWorker.ready.then(registration => {
-
-      registration.showNotification("BeduRoom Active", {
-
-        body: "The chat is active. Join the discussion.",
-
-        icon: "favicon.png",
-
-        badge: "favicon.png",
-
-        vibrate: [200, 100, 200],
-
-        tag: "bedu-reminder"
-
-      });
-
-    });
-
-  }
-
 </script>
               
               
