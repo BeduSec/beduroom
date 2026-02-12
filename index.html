@@ -260,7 +260,7 @@ document.body.addEventListener('touchstart', triggerFullscreen);
 
             <div class="p-4 sm:p-6 glass-panel border-t border-white/5 shrink-0 z-20">
                 <div class="relative max-w-4xl mx-auto flex gap-3 items-end">
-                    <textarea id="message-input" placeholder="Inject payload..." rows="1" class="glass-input flex-1 px-5 py-4 rounded-xl text-sm placeholder-zinc-600 transition-all overflow-y-auto max-h-32" oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'"></textarea>
+                    <textarea id="message-input" placeholder="Message" rows="1" class="glass-input flex-1 px-5 py-4 rounded-xl text-sm placeholder-zinc-600 transition-all overflow-y-auto max-h-32" oninput="this.style.height = '';this.style.height = this.scrollHeight + 'px'"></textarea>
                     <button onclick="sendMessage()" class="bg-white text-black h-[54px] w-[54px] rounded-xl hover:bg-zinc-200 transition-all flex items-center justify-center shadow-lg flex-shrink-0">
                         <i data-lucide="send" class="w-5 h-5 ml-0.5"></i>
                     </button>
